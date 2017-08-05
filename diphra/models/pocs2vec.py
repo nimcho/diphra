@@ -45,12 +45,15 @@ import sys
 import numpy as np
 import os
 
-from queue import Queue
 from timeit import default_timer
 from scipy.special import expit
 from numpy.random import rand, randint
 from numpy import array, zeros, uint32, full, iinfo, intersect1d, \
     float32 as real, empty
+try:
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty
 
 from ..pocs import HDF5POcs, pocs2vocab
 
