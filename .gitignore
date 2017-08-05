@@ -1,0 +1,6 @@
+*.pyc
+*.so
+.ipynb
+
+# dev envs
+.idea
