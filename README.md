@@ -36,7 +36,7 @@ before installing NumPy &mdash; speeds up performance by as much as an order of 
 The easiest way to install DiPhra is using pip:
 
 ```
-sudo pip install git+https://github.com/nimcho/diphra
+pip install https://github.com/nimcho/diphra/tarball/master
 ```
 
 ## Data Structure: Phrase Occurrences (POcs)

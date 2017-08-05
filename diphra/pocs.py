@@ -4,7 +4,6 @@
 # Copyright (C) 2017 Lukas Banic <lukas.banic@protonmail.com>
 # Licensed under the GNU LGPL v2.1 - http://www.gnu.org/licenses/lgpl.html
 import sys
-import h5py
 
 from collections import defaultdict
 from os.path import exists
@@ -14,6 +13,11 @@ from .utils import collate, external_sort
 from .reader import our_open
 
 MASK_VALUE = iinfo(uint32).max
+
+try:
+    import h5py
+except ImportError:
+    h5py = None
 
 
 def line2poc(line):
@@ -168,6 +172,9 @@ class HDF5POcs(POcs):
     @staticmethod
     def build(pocs, output_name, max_len=None, use_ids=False):
 
+        if h5py is None:
+            raise RuntimeError("`h5py` not installed.")
+
         if exists(output_name):
             raise ValueError(
                 "File `%s` already exists" % output_name
@@ -286,6 +293,8 @@ class HDF5POcs(POcs):
         h5_file.close()
 
     def __init__(self, filename):
+        if h5py is None:
+            raise RuntimeError("`h5py` not installed.")
         self.filename = filename
         self.file = h5py.File(filename)
         nb_pocs = len(self.file["pocs"])
