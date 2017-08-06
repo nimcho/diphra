@@ -6,7 +6,7 @@
 import sys
 
 from collections import defaultdict
-from os.path import exists
+from os.path import exists, getsize
 from numpy import zeros, uint32, iinfo, full, array
 
 from .utils import collate, external_sort
@@ -175,7 +175,7 @@ class HDF5POcs(POcs):
         if h5py is None:
             raise RuntimeError("`h5py` not installed.")
 
-        if exists(output_name):
+        if exists(output_name) and getsize(output_name) > 0:
             raise ValueError(
                 "File `%s` already exists" % output_name
             )
@@ -185,10 +185,10 @@ class HDF5POcs(POcs):
                 "Max. length not specified, iterating over "
                 "pocs to find it out.\n"
             )
-            max_length = 1
+            max_len = 1
             for poc in pocs:
-                if len(poc[2]) > max_length:
-                    max_length = len(poc[2])
+                if len(poc[2]) > max_len:
+                    max_len = len(poc[2])
 
         if not use_ids:
             pocs = IDPOcs(pocs)
@@ -299,8 +299,9 @@ class HDF5POcs(POcs):
         self.file = h5py.File(filename)
         nb_pocs = len(self.file["pocs"])
         super(HDF5POcs, self).__init__(lambda: self.read_pocs(0, nb_pocs))
-        self.i2phrase = dict()
+        self.i2phrase = None
         if "phrases" in self.file:
+            self.i2phrase = dict()
             for i, phrase in enumerate(self.file["phrases"].value):
                 self.i2phrase[i] = phrase
 
@@ -319,7 +320,12 @@ class HDF5POcs(POcs):
             phrase_i = row[0]
             sentence_i = row[1]
             positions = row[2:][row[2:] != MASK_VALUE]
-            yield phrase_i, sentence_i, tuple(positions)
+            phrase = (
+                self.i2phrase[phrase_i]
+                if self.i2phrase is not None
+                else phrase_i
+            )
+            yield phrase, sentence_i, tuple(positions)
 
     def __del__(self):
         self.file.close()
